@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LHOPE Memorial NFTs | MUMMYTOKENCOIN</title>
+    
+    <!-- Favicons for all devices and browsers -->
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="shortcut icon" href="favicon.ico">
+    
+    <!-- Android Chrome -->
+    <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="android-chrome-512x512.png">
+    
+    <!-- Apple iOS -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -328,6 +343,32 @@
             height: 100%;
             background: var(--gold);
             transition: width 0.3s;
+        }
+        
+        /* Tokenomics Table */
+        .tokenomics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .tokenomics-table td {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+        }
+        
+        .tokenomics-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .token-name {
+            font-weight: bold;
+            color: var(--gold);
+        }
+        
+        .token-percentage {
+            font-weight: bold;
+            text-align: right;
         }
         
         footer {
@@ -715,6 +756,39 @@
                     <p><strong>📦 Storage: Lighthouse (IPFS + Filecoin)</strong></p>
                     <p style="font-size: 12px;">Images and metadata are stored permanently on decentralized storage</p>
                     <p style="font-size: 11px;">Free tier: 5 GB | Permanent Filecoin backup</p>
+                </div>
+                
+                <!-- Tokenomics Section -->
+                <div class="lhope-info" style="margin-top: 20px;">
+                    <p><strong>💰 $MTC Tokenomics</strong></p>
+                    <p style="font-size: 14px; margin-bottom: 10px;">Total Supply: <strong>1,000,000,000 MTC</strong></p>
+                    <table class="tokenomics-table">
+                        <tr>
+                            <td class="token-name">Community & Rewards</td>
+                            <td class="token-percentage">30%</td>
+                        </tr>
+                        <tr>
+                            <td class="token-name">Liquidity Pool</td>
+                            <td class="token-percentage">25%</td>
+                        </tr>
+                        <tr>
+                            <td class="token-name">LHOPE Fund</td>
+                            <td class="token-percentage">20%</td>
+                        </tr>
+                        <tr>
+                            <td class="token-name">Marketing & Growth</td>
+                            <td class="token-percentage">10%</td>
+                        </tr>
+                        <tr>
+                            <td class="token-name">Development & Team</td>
+                            <td class="token-percentage">10%</td>
+                        </tr>
+                        <tr>
+                            <td class="token-name">Reserve / Exchanges</td>
+                            <td class="token-percentage">5%</td>
+                        </tr>
+                    </table>
+                    <p style="font-size: 11px; margin-top: 10px;">✅ Verified on BscScan | Transparent Allocation</p>
                 </div>
             </div>
         </div>
