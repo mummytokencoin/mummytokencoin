@@ -831,55 +831,68 @@
         let userAddress = null;
         let uploadedMetadataCID = null;
         
-        // ============ LIGHTHOUSE UPLOAD FUNCTION ============
-        async function uploadToLighthouse(file, nftTitle, description, honoredName) {
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            const uploadResponse = await fetch('https://node.lighthouse.storage/api/lighthouse/upload', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${LIGHTHOUSE_API_KEY}`
-                },
-                body: formData
-            });
-            
-            const uploadData = await uploadResponse.json();
-            const imageCID = uploadData.data.Hash;
-            
-            const metadata = {
-                name: nftTitle || `In Memory of ${honoredName}`,
-                description: description,
-                image: `ipfs://${imageCID}`,
-                properties: {
-                    project: "MUMMYTOKENCOIN LHOPE",
-                    cause: "Liver Health Awareness",
-                    honoredPerson: honoredName,
-                    network: "BNB Smart Chain"
-                }
-            };
-            
-            const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });
-            const metadataFormData = new FormData();
-            metadataFormData.append('file', metadataBlob, 'metadata.json');
-            
-            const metadataResponse = await fetch('https://node.lighthouse.storage/api/lighthouse/upload', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${LIGHTHOUSE_API_KEY}`
-                },
-                body: metadataFormData
-            });
-            
-            const metadataData = await metadataResponse.json();
-            const metadataCID = metadataData.data.Hash;
-            
-            return {
-                imageCID: imageCID,
-                metadataCID: metadataCID,
-                tokenURI: `ipfs://${metadataCID}`
-            };
-        }
+        // ============ PINATA STORAGE (WORKING) ============
+const PINATA_API_KEY = '1749c5278d27059c35c5';
+const PINATA_SECRET = '79988f5e63c0a6906ff9274a08d7d69d54778472ddff08e6854a802796132757';
+
+async function uploadToPinata(file, nftTitle, description, honoredName) {
+    // Step 1: Upload image to Pinata
+    const imageFormData = new FormData();
+    imageFormData.append('file', file);
+    
+    const imageResponse = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+        method: 'POST',
+        headers: {
+            'pinata_api_key': PINATA_API_KEY,
+            'pinata_secret_api_key': PINATA_SECRET
+        },
+        body: imageFormData
+    });
+    
+    if (!imageResponse.ok) {
+        const error = await imageResponse.text();
+        throw new Error(`Image upload failed: ${error}`);
+    }
+    
+    const imageData = await imageResponse.json();
+    const imageCID = imageData.IpfsHash;
+    
+    // Step 2: Create metadata
+    const metadata = {
+        name: nftTitle || `In Memory of ${honoredName}`,
+        description: description,
+        image: `ipfs://${imageCID}`,
+        attributes: [
+            { trait_type: "Project", value: "MUMMYTOKENCOIN LHOPE" },
+            { trait_type: "Cause", value: "Liver Health Awareness" },
+            { trait_type: "Honored Person", value: honoredName },
+            { trait_type: "Network", value: "BNB Smart Chain" }
+        ]
+    };
+    
+    // Step 3: Upload metadata to Pinata
+    const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });
+    const metadataFormData = new FormData();
+    metadataFormData.append('file', metadataBlob, 'metadata.json');
+    
+    const metadataResponse = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+        method: 'POST',
+        headers: {
+            'pinata_api_key': PINATA_API_KEY,
+            'pinata_secret_api_key': PINATA_SECRET
+        },
+        body: metadataFormData
+    });
+    
+    const metadataData = await metadataResponse.json();
+    const metadataCID = metadataData.IpfsHash;
+    
+    return {
+        imageCID: imageCID,
+        metadataCID: metadataCID,
+        tokenURI: `ipfs://${metadataCID}`
+    };
+}
         
         // ============ WALLET CONNECTION ============
         async function connectWallet() {
@@ -1024,55 +1037,55 @@
         
         // ============ FILE UPLOAD HANDLER ============
         async function handleFileUpload(file) {
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const preview = document.getElementById("previewImage");
-                preview.src = e.target.result;
-                preview.style.display = "block";
-            };
-            reader.readAsDataURL(file);
-            
-            const statusDiv = document.getElementById("uploadStatus");
-            const progressBar = document.getElementById("uploadProgress");
-            const progressFill = document.querySelector(".progress-fill");
-            
-            statusDiv.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Uploading to IPFS via Lighthouse...";
-            progressBar.style.display = "block";
-            progressFill.style.width = "30%";
-            
-            try {
-                const nftTitle = document.getElementById("nftTitle").value || "LHOPE Memorial NFT";
-                const honoredName = document.getElementById("honoredName").value || "A Loved One";
-                const memorialMessage = document.getElementById("memorialMessage").value || "In loving memory";
-                
-                progressFill.style.width = "60%";
-                
-                const result = await uploadToLighthouse(file, nftTitle, memorialMessage, honoredName);
-                
-                progressFill.style.width = "100%";
-                
-                uploadedMetadataCID = result.tokenURI;
-                
-                statusDiv.innerHTML = `
-                    <i class="fas fa-check-circle"></i> Successfully uploaded to IPFS + Filecoin!<br>
-                    <small>Image CID: ${result.imageCID.substring(0, 20)}...</small><br>
-                    <small>Metadata CID: ${result.metadataCID.substring(0, 20)}...</small><br>
-                    <small>Your memorial is now permanently stored on decentralized storage</small>
-                `;
-                
-                setTimeout(() => {
-                    progressBar.style.display = "none";
-                    progressFill.style.width = "0%";
-                }, 2000);
-                
-            } catch (error) {
-                console.error("Upload error:", error);
-                statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Upload failed: ${error.message}`;
-                progressBar.style.display = "none";
-            }
-        }
+    if (!file) return;
+    
+    // Preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const preview = document.getElementById("previewImage");
+        preview.src = e.target.result;
+        preview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+    
+    const statusDiv = document.getElementById("uploadStatus");
+    const progressBar = document.getElementById("uploadProgress");
+    const progressFill = document.querySelector(".progress-fill");
+    
+    statusDiv.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Uploading to IPFS via Pinata...";
+    progressBar.style.display = "block";
+    progressFill.style.width = "30%";
+    
+    try {
+        const nftTitle = document.getElementById("nftTitle").value || "LHOPE Memorial NFT";
+        const honoredName = document.getElementById("honoredName").value || "A Loved One";
+        const memorialMessage = document.getElementById("memorialMessage").value || "In loving memory";
+        
+        progressFill.style.width = "60%";
+        
+        const result = await uploadToPinata(file, nftTitle, memorialMessage, honoredName);
+        
+        progressFill.style.width = "100%";
+        
+        uploadedMetadataCID = result.tokenURI;
+        
+        statusDiv.innerHTML = `
+            <i class="fas fa-check-circle"></i> Successfully uploaded to IPFS via Pinata!<br>
+            <small>IPFS Hash: ${result.imageCID.substring(0, 20)}...</small><br>
+            <small>Your memorial is now permanently stored</small>
+        `;
+        
+        setTimeout(() => {
+            progressBar.style.display = "none";
+            progressFill.style.width = "0%";
+        }, 2000);
+        
+    } catch (error) {
+        console.error("Upload error:", error);
+        statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Upload failed: ${error.message}`;
+        progressBar.style.display = "none";
+    }
+}
         
         // ============ EVENT LISTENERS ============
         document.getElementById("connectWalletBtn")?.addEventListener("click", connectWallet);
