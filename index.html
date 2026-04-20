@@ -137,6 +137,23 @@
             transform: scale(1.05);
         }
         
+        .disconnect-btn {
+            background: rgba(255,215,0,0.1);
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-left: 15px;
+        }
+        
+        .disconnect-btn:hover {
+            background: rgba(255,215,0,0.3);
+        }
+        
         .wallet-info {
             background: rgba(255,215,0,0.1);
             border: 1px solid var(--gold);
@@ -147,6 +164,11 @@
             gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
+        }
+        
+        .wallet-address {
+            font-family: monospace;
+            font-size: 1rem;
         }
         
         .stats-banner {
@@ -466,20 +488,15 @@
             background: rgba(255,215,0,0.3);
         }
         
-        .disconnect-btn {
-            background: rgba(220,53,69,0.2);
-            border: 1px solid #dc3545;
-            color: #dc3545;
-            margin-left: 15px;
-            padding: 8px 15px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-        }
-        
-        .disconnect-btn:hover {
-            background: rgba(220,53,69,0.4);
+        .network-badge {
+            display: inline-block;
+            background: rgba(40,167,69,0.2);
+            border: 1px solid #28a745;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            margin-left: 10px;
+            color: #28a745;
         }
     </style>
 </head>
@@ -570,24 +587,201 @@
                 <div class="form-group">
                     <label><i class="fas fa-map-marker-alt"></i> Country</label>
                     <select id="country">
-                        <option value="Afghanistan">Afghanistan</option><option value="Albania">Albania</option><option value="Algeria">Algeria</option>
-                        <option value="Andorra">Andorra</option><option value="Angola">Angola</option><option value="Argentina">Argentina</option>
-                        <option value="Australia">Australia</option><option value="Austria">Austria</option><option value="Bangladesh">Bangladesh</option>
-                        <option value="Belgium">Belgium</option><option value="Brazil">Brazil</option><option value="Canada">Canada</option>
-                        <option value="China">China</option><option value="Denmark">Denmark</option><option value="Egypt">Egypt</option>
-                        <option value="Finland">Finland</option><option value="France">France</option><option value="Germany">Germany</option>
-                        <option value="Greece">Greece</option><option value="India">India</option><option value="Indonesia">Indonesia</option>
-                        <option value="Iran">Iran</option><option value="Iraq">Iraq</option><option value="Ireland">Ireland</option>
-                        <option value="Israel">Israel</option><option value="Italy">Italy</option><option value="Japan">Japan</option>
-                        <option value="Malaysia">Malaysia</option><option value="Mexico">Mexico</option><option value="Nepal">Nepal</option>
-                        <option value="Netherlands">Netherlands</option><option value="New Zealand">New Zealand</option><option value="Nigeria">Nigeria</option>
-                        <option value="Norway">Norway</option><option value="Pakistan">Pakistan</option><option value="Philippines">Philippines</option>
-                        <option value="Poland">Poland</option><option value="Portugal">Portugal</option><option value="Russia">Russia</option>
-                        <option value="Saudi Arabia">Saudi Arabia</option><option value="Singapore">Singapore</option><option value="South Africa">South Africa</option>
-                        <option value="Spain">Spain</option><option value="Sri Lanka">Sri Lanka</option><option value="Sweden">Sweden</option>
-                        <option value="Switzerland">Switzerland</option><option value="Thailand">Thailand</option><option value="Turkey">Turkey</option>
-                        <option value="United Arab Emirates">United Arab Emirates</option><option value="United Kingdom">United Kingdom</option>
-                        <option value="United States" selected>United States</option><option value="Vietnam">Vietnam</option>
+                        <option value="Afghanistan">Afghanistan</option>
+                        <option value="Albania">Albania</option>
+                        <option value="Algeria">Algeria</option>
+                        <option value="Andorra">Andorra</option>
+                        <option value="Angola">Angola</option>
+                        <option value="Antigua and Barbuda">Antigua and Barbuda</option>
+                        <option value="Argentina">Argentina</option>
+                        <option value="Armenia">Armenia</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Austria">Austria</option>
+                        <option value="Azerbaijan">Azerbaijan</option>
+                        <option value="Bahamas">Bahamas</option>
+                        <option value="Bahrain">Bahrain</option>
+                        <option value="Bangladesh">Bangladesh</option>
+                        <option value="Barbados">Barbados</option>
+                        <option value="Belarus">Belarus</option>
+                        <option value="Belgium">Belgium</option>
+                        <option value="Belize">Belize</option>
+                        <option value="Benin">Benin</option>
+                        <option value="Bhutan">Bhutan</option>
+                        <option value="Bolivia">Bolivia</option>
+                        <option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option>
+                        <option value="Botswana">Botswana</option>
+                        <option value="Brazil">Brazil</option>
+                        <option value="Brunei">Brunei</option>
+                        <option value="Bulgaria">Bulgaria</option>
+                        <option value="Burkina Faso">Burkina Faso</option>
+                        <option value="Burundi">Burundi</option>
+                        <option value="Cabo Verde">Cabo Verde</option>
+                        <option value="Cambodia">Cambodia</option>
+                        <option value="Cameroon">Cameroon</option>
+                        <option value="Canada">Canada</option>
+                        <option value="Central African Republic">Central African Republic</option>
+                        <option value="Chad">Chad</option>
+                        <option value="Chile">Chile</option>
+                        <option value="China">China</option>
+                        <option value="Colombia">Colombia</option>
+                        <option value="Comoros">Comoros</option>
+                        <option value="Congo">Congo</option>
+                        <option value="Costa Rica">Costa Rica</option>
+                        <option value="Croatia">Croatia</option>
+                        <option value="Cuba">Cuba</option>
+                        <option value="Cyprus">Cyprus</option>
+                        <option value="Czech Republic">Czech Republic</option>
+                        <option value="Denmark">Denmark</option>
+                        <option value="Djibouti">Djibouti</option>
+                        <option value="Dominica">Dominica</option>
+                        <option value="Dominican Republic">Dominican Republic</option>
+                        <option value="Ecuador">Ecuador</option>
+                        <option value="Egypt">Egypt</option>
+                        <option value="El Salvador">El Salvador</option>
+                        <option value="Equatorial Guinea">Equatorial Guinea</option>
+                        <option value="Eritrea">Eritrea</option>
+                        <option value="Estonia">Estonia</option>
+                        <option value="Eswatini">Eswatini</option>
+                        <option value="Ethiopia">Ethiopia</option>
+                        <option value="Fiji">Fiji</option>
+                        <option value="Finland">Finland</option>
+                        <option value="France">France</option>
+                        <option value="Gabon">Gabon</option>
+                        <option value="Gambia">Gambia</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Germany">Germany</option>
+                        <option value="Ghana">Ghana</option>
+                        <option value="Greece">Greece</option>
+                        <option value="Grenada">Grenada</option>
+                        <option value="Guatemala">Guatemala</option>
+                        <option value="Guinea">Guinea</option>
+                        <option value="Guinea-Bissau">Guinea-Bissau</option>
+                        <option value="Guyana">Guyana</option>
+                        <option value="Haiti">Haiti</option>
+                        <option value="Honduras">Honduras</option>
+                        <option value="Hungary">Hungary</option>
+                        <option value="Iceland">Iceland</option>
+                        <option value="India">India</option>
+                        <option value="Indonesia">Indonesia</option>
+                        <option value="Iran">Iran</option>
+                        <option value="Iraq">Iraq</option>
+                        <option value="Ireland">Ireland</option>
+                        <option value="Israel">Israel</option>
+                        <option value="Italy">Italy</option>
+                        <option value="Jamaica">Jamaica</option>
+                        <option value="Japan">Japan</option>
+                        <option value="Jordan">Jordan</option>
+                        <option value="Kazakhstan">Kazakhstan</option>
+                        <option value="Kenya">Kenya</option>
+                        <option value="Kiribati">Kiribati</option>
+                        <option value="Korea North">Korea North</option>
+                        <option value="Korea South">Korea South</option>
+                        <option value="Kosovo">Kosovo</option>
+                        <option value="Kuwait">Kuwait</option>
+                        <option value="Kyrgyzstan">Kyrgyzstan</option>
+                        <option value="Laos">Laos</option>
+                        <option value="Latvia">Latvia</option>
+                        <option value="Lebanon">Lebanon</option>
+                        <option value="Lesotho">Lesotho</option>
+                        <option value="Liberia">Liberia</option>
+                        <option value="Libya">Libya</option>
+                        <option value="Liechtenstein">Liechtenstein</option>
+                        <option value="Lithuania">Lithuania</option>
+                        <option value="Luxembourg">Luxembourg</option>
+                        <option value="Madagascar">Madagascar</option>
+                        <option value="Malawi">Malawi</option>
+                        <option value="Malaysia">Malaysia</option>
+                        <option value="Maldives">Maldives</option>
+                        <option value="Mali">Mali</option>
+                        <option value="Malta">Malta</option>
+                        <option value="Marshall Islands">Marshall Islands</option>
+                        <option value="Mauritania">Mauritania</option>
+                        <option value="Mauritius">Mauritius</option>
+                        <option value="Mexico">Mexico</option>
+                        <option value="Micronesia">Micronesia</option>
+                        <option value="Moldova">Moldova</option>
+                        <option value="Monaco">Monaco</option>
+                        <option value="Mongolia">Mongolia</option>
+                        <option value="Montenegro">Montenegro</option>
+                        <option value="Morocco">Morocco</option>
+                        <option value="Mozambique">Mozambique</option>
+                        <option value="Myanmar">Myanmar</option>
+                        <option value="Namibia">Namibia</option>
+                        <option value="Nauru">Nauru</option>
+                        <option value="Nepal">Nepal</option>
+                        <option value="Netherlands">Netherlands</option>
+                        <option value="New Zealand">New Zealand</option>
+                        <option value="Nicaragua">Nicaragua</option>
+                        <option value="Niger">Niger</option>
+                        <option value="Nigeria">Nigeria</option>
+                        <option value="North Macedonia">North Macedonia</option>
+                        <option value="Norway">Norway</option>
+                        <option value="Oman">Oman</option>
+                        <option value="Pakistan">Pakistan</option>
+                        <option value="Palau">Palau</option>
+                        <option value="Palestine">Palestine</option>
+                        <option value="Panama">Panama</option>
+                        <option value="Papua New Guinea">Papua New Guinea</option>
+                        <option value="Paraguay">Paraguay</option>
+                        <option value="Peru">Peru</option>
+                        <option value="Philippines">Philippines</option>
+                        <option value="Poland">Poland</option>
+                        <option value="Portugal">Portugal</option>
+                        <option value="Qatar">Qatar</option>
+                        <option value="Romania">Romania</option>
+                        <option value="Russia">Russia</option>
+                        <option value="Rwanda">Rwanda</option>
+                        <option value="Saint Kitts and Nevis">Saint Kitts and Nevis</option>
+                        <option value="Saint Lucia">Saint Lucia</option>
+                        <option value="Saint Vincent">Saint Vincent</option>
+                        <option value="Samoa">Samoa</option>
+                        <option value="San Marino">San Marino</option>
+                        <option value="Sao Tome and Principe">Sao Tome and Principe</option>
+                        <option value="Saudi Arabia">Saudi Arabia</option>
+                        <option value="Senegal">Senegal</option>
+                        <option value="Serbia">Serbia</option>
+                        <option value="Seychelles">Seychelles</option>
+                        <option value="Sierra Leone">Sierra Leone</option>
+                        <option value="Singapore">Singapore</option>
+                        <option value="Slovakia">Slovakia</option>
+                        <option value="Slovenia">Slovenia</option>
+                        <option value="Solomon Islands">Solomon Islands</option>
+                        <option value="Somalia">Somalia</option>
+                        <option value="South Africa">South Africa</option>
+                        <option value="South Sudan">South Sudan</option>
+                        <option value="Spain">Spain</option>
+                        <option value="Sri Lanka">Sri Lanka</option>
+                        <option value="Sudan">Sudan</option>
+                        <option value="Suriname">Suriname</option>
+                        <option value="Sweden">Sweden</option>
+                        <option value="Switzerland">Switzerland</option>
+                        <option value="Syria">Syria</option>
+                        <option value="Taiwan">Taiwan</option>
+                        <option value="Tajikistan">Tajikistan</option>
+                        <option value="Tanzania">Tanzania</option>
+                        <option value="Thailand">Thailand</option>
+                        <option value="Timor-Leste">Timor-Leste</option>
+                        <option value="Togo">Togo</option>
+                        <option value="Tonga">Tonga</option>
+                        <option value="Trinidad and Tobago">Trinidad and Tobago</option>
+                        <option value="Tunisia">Tunisia</option>
+                        <option value="Turkey">Turkey</option>
+                        <option value="Turkmenistan">Turkmenistan</option>
+                        <option value="Tuvalu">Tuvalu</option>
+                        <option value="Uganda">Uganda</option>
+                        <option value="Ukraine">Ukraine</option>
+                        <option value="United Arab Emirates">United Arab Emirates</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                        <option value="United States" selected>United States</option>
+                        <option value="Uruguay">Uruguay</option>
+                        <option value="Uzbekistan">Uzbekistan</option>
+                        <option value="Vanuatu">Vanuatu</option>
+                        <option value="Vatican City">Vatican City</option>
+                        <option value="Venezuela">Venezuela</option>
+                        <option value="Vietnam">Vietnam</option>
+                        <option value="Yemen">Yemen</option>
+                        <option value="Zambia">Zambia</option>
+                        <option value="Zimbabwe">Zimbabwe</option>
                     </select>
                 </div>
                 
@@ -642,12 +836,30 @@
                     <p><strong>💰 $MTC Tokenomics</strong></p>
                     <p style="font-size: 14px; margin-bottom: 10px;">Total Supply: <strong>1,000,000,000 MTC</strong></p>
                     <table class="tokenomics-table">
-                        <tr><td class="token-name">Community & Rewards</td><td class="token-percentage">30%</td></tr>
-                        <tr><td class="token-name">Liquidity Pool</td><td class="token-percentage">25%</td></tr>
-                        <tr><td class="token-name">LHOPE Fund</td><td class="token-percentage">20%</td></tr>
-                        <tr><td class="token-name">Marketing & Growth</td><td class="token-percentage">10%</td></tr>
-                        <tr><td class="token-name">Development & Team</td><td class="token-percentage">10%</td></tr>
-                        <tr><td class="token-name">Reserve / Exchanges</td><td class="token-percentage">5%</td></tr>
+                        <tr>
+                            <td class="token-name">Community & Rewards</td>
+                            <td class="token-percentage">30%</td>
+                        </tr>
+                        <tr>
+                            <td class="token-name">Liquidity Pool</td>
+                            <td class="token-percentage">25%</td>
+                        </tr>
+                        <tr>
+                            <td class="token-name">LHOPE Fund</td>
+                            <td class="token-percentage">20%</td>
+                        </tr>
+                        <tr>
+                            <td class="token-name">Marketing & Growth</td>
+                            <td class="token-percentage">10%</td>
+                        </tr>
+                        <tr>
+                            <td class="token-name">Development & Team</td>
+                            <td class="token-percentage">10%</td>
+                        </tr>
+                        <tr>
+                            <td class="token-name">Reserve / Exchanges</td>
+                            <td class="token-percentage">5%</td>
+                        </tr>
                     </table>
                     <p style="font-size: 11px; margin-top: 10px;">✅ Verified on BscScan | Transparent Allocation</p>
                 </div>
@@ -677,6 +889,8 @@
         
         // ============ CONFIGURATION ============
         const CONTRACT_ADDRESS = "0x5A3CaDB539b96cC461a5219C956F8106165BC4ae";
+        const BSC_CHAIN_ID = "0x38"; // 56 in hex
+        const BSC_CHAIN_ID_DECIMAL = 56;
         
         const CONTRACT_ABI = [
             "function mintMemorial(string memory tokenURI, string memory honoredPerson, string memory memorialMessage, string memory country) public payable returns (uint256)",
@@ -685,16 +899,133 @@
             "function mintPriceBNB() public view returns (uint256)"
         ];
         
-        let provider;
-        let signer;
-        let nftContract;
+        let provider = null;
+        let signer = null;
+        let nftContract = null;
         let userAddress = null;
         let uploadedMetadataCID = null;
+        let currentProvider = null;
         
-        // ============ WALLET CONNECTION FUNCTIONS ============
+        // ============ CHECK IF WALLET IS CONNECTED ============
+        async function checkWalletConnection() {
+            if (!window.ethereum) return false;
+            
+            try {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0) {
+                    userAddress = accounts[0];
+                    return true;
+                }
+            } catch (error) {
+                console.log("No accounts found");
+            }
+            return false;
+        }
         
-        // Reset UI to disconnected state
-        function resetToDisconnectedState() {
+        // ============ SWITCH TO BSC NETWORK ============
+        async function switchToBSCNetwork() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: BSC_CHAIN_ID }]
+                });
+                return true;
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: BSC_CHAIN_ID,
+                                chainName: 'BNB Smart Chain',
+                                nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+                                rpcUrls: ['https://bsc-dataseed.binance.org'],
+                                blockExplorerUrls: ['https://bscscan.com']
+                            }]
+                        });
+                        return true;
+                    } catch (addError) {
+                        console.error("Failed to add BSC network:", addError);
+                        return false;
+                    }
+                } else {
+                    console.error("Failed to switch network:", switchError);
+                    return false;
+                }
+            }
+        }
+        
+        // ============ SETUP EVENT LISTENERS ============
+        function setupEventListeners() {
+            if (!window.ethereum) return;
+            
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    disconnectWallet();
+                } else if (accounts[0] !== userAddress) {
+                    userAddress = accounts[0];
+                    updateWalletUI();
+                    loadContractData();
+                }
+            });
+            
+            window.ethereum.on('chainChanged', (chainId) => {
+                if (chainId !== BSC_CHAIN_ID) {
+                    alert("Please switch to BNB Smart Chain network to use this DApp.");
+                    disconnectWallet();
+                } else {
+                    window.location.reload();
+                }
+            });
+        }
+        
+        // ============ LOAD CONTRACT DATA ============
+        async function loadContractData() {
+            if (!nftContract) return;
+            
+            try {
+                const totalSupply = await nftContract.totalSupply();
+                document.getElementById("totalNFTs").innerText = totalSupply.toString();
+                
+                const balance = await nftContract.balanceOf(userAddress);
+                document.getElementById("yourNFTs").innerText = balance.toString();
+            } catch (e) {
+                console.log("Could not fetch contract data:", e);
+            }
+        }
+        
+        // ============ UPDATE WALLET UI ============
+        async function updateWalletUI() {
+            if (userAddress && provider) {
+                const bnbBalance = await provider.getBalance(userAddress);
+                const balanceBNB = parseFloat(ethers.utils.formatEther(bnbBalance)).toFixed(4);
+                
+                document.getElementById("walletStatus").innerHTML = `
+                    <div class="wallet-info">
+                        <i class="fas fa-check-circle" style="color: var(--gold);"></i>
+                        <span class="wallet-address">${userAddress.slice(0,6)}...${userAddress.slice(-4)}</span>
+                        <span class="network-badge">BSC Mainnet</span>
+                        <span style="font-size: 0.9rem;">(${balanceBNB} BNB)</span>
+                        <button class="disconnect-btn" id="disconnectBtn">
+                            <i class="fas fa-sign-out-alt"></i> Disconnect
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById("statsBanner").style.display = "grid";
+                document.getElementById("bnbBalance").innerHTML = `${balanceBNB} BNB`;
+                document.getElementById("mintBtn").disabled = false;
+                document.getElementById("mintBtn").innerHTML = '<i class="fas fa-gem"></i> Mint Memorial NFT (0.001 BNB)';
+                document.getElementById("walletOptions").style.display = "none";
+                
+                document.getElementById("disconnectBtn")?.addEventListener("click", disconnectWallet);
+                
+                await loadContractData();
+            }
+        }
+        
+        // ============ DISCONNECT WALLET ============
+        async function disconnectWallet() {
             userAddress = null;
             provider = null;
             signer = null;
@@ -715,113 +1046,59 @@
             document.getElementById("statsBanner").style.display = "none";
             document.getElementById("mintBtn").disabled = true;
             document.getElementById("mintBtn").innerHTML = '<i class="fas fa-gem"></i> Connect Wallet to Mint';
+            document.getElementById("previewImage").style.display = "none";
+            document.getElementById("uploadStatus").innerHTML = "";
+            document.getElementById("honoredName").value = "";
+            document.getElementById("memorialMessage").value = "";
+            document.getElementById("nftTitle").value = "";
             
-            // Re-attach event listeners
             document.getElementById("connectWalletBtn")?.addEventListener("click", showWalletOptions);
+            
             document.querySelectorAll(".wallet-option").forEach(option => {
-                option.addEventListener("click", (e) => {
-                    const wallet = e.target.getAttribute("data-wallet");
-                    connectWallet(wallet);
-                });
+                option.removeEventListener("click", handleWalletClick);
+                option.addEventListener("click", handleWalletClick);
             });
         }
         
-        // Disconnect wallet
-        async function disconnectWallet() {
-            if (window.ethereum && window.ethereum.removeAllListeners) {
-                window.ethereum.removeAllListeners('accountsChanged');
-                window.ethereum.removeAllListeners('chainChanged');
-            }
-            resetToDisconnectedState();
-        }
-        
-        // Connect to wallet
+        // ============ CONNECT WALLET ============
         async function connectWallet(walletType = 'metamask') {
+            if (!window.ethereum) {
+                alert("No wallet detected. Please install MetaMask, Trust Wallet, or Coinbase Wallet.");
+                return;
+            }
+            
             try {
-                if (!window.ethereum) {
-                    alert("No Web3 wallet detected! Please install MetaMask, Trust Wallet, or Coinbase Wallet.");
+                const networkValid = await switchToBSCNetwork();
+                if (!networkValid) {
+                    alert("Please switch to BNB Smart Chain network manually.");
                     return;
                 }
                 
-                // Request BSC Mainnet
-                await window.ethereum.request({
-                    method: "wallet_switchEthereumChain",
-                    params: [{ chainId: "0x38" }]
-                }).catch(async () => {
-                    await window.ethereum.request({
-                        method: "wallet_addEthereumChain",
-                        params: [{
-                            chainId: "0x38",
-                            chainName: "BNB Smart Chain",
-                            nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
-                            rpcUrls: ["https://bsc-dataseed.binance.org"],
-                            blockExplorerUrls: ["https://bscscan.com"]
-                        }]
-                    });
-                });
-                
-                const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-                
-                if (!accounts || accounts.length === 0) {
-                    alert("No accounts found. Please unlock your wallet and try again.");
-                    return;
-                }
-                
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
                 userAddress = accounts[0];
+                
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
                 nftContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
                 
-                // Get total supply
-                try {
-                    const totalSupply = await nftContract.totalSupply();
-                    document.getElementById("totalNFTs").innerText = totalSupply.toString();
-                } catch (e) {
-                    document.getElementById("totalNFTs").innerText = "0";
-                }
-                
-                const bnbBalance = await provider.getBalance(userAddress);
-                
-                document.getElementById("walletStatus").innerHTML = `
-                    <div class="wallet-info">
-                        <i class="fas fa-check-circle" style="color: var(--gold);"></i>
-                        Connected: ${userAddress.slice(0,6)}...${userAddress.slice(-4)}
-                        <button class="disconnect-btn" id="disconnectBtn">
-                            <i class="fas fa-sign-out-alt"></i> Disconnect
-                        </button>
-                    </div>
-                `;
-                
-                document.getElementById("statsBanner").style.display = "grid";
-                document.getElementById("bnbBalance").innerHTML = `${parseFloat(ethers.utils.formatEther(bnbBalance)).toFixed(4)} BNB`;
-                document.getElementById("mintBtn").disabled = false;
-                document.getElementById("mintBtn").innerHTML = '<i class="fas fa-gem"></i> Mint Memorial NFT (0.001 BNB)';
-                
-                document.getElementById("disconnectBtn")?.addEventListener("click", disconnectWallet);
-                
-                // Listen for account changes
-                window.ethereum.on('accountsChanged', (newAccounts) => {
-                    if (newAccounts.length === 0) {
-                        disconnectWallet();
-                    } else if (newAccounts[0] !== userAddress) {
-                        connectWallet(walletType);
-                    }
-                });
-                
-                window.ethereum.on('chainChanged', () => {
-                    window.location.reload();
-                });
+                await updateWalletUI();
                 
             } catch (error) {
                 console.error("Connection error:", error);
                 alert("Failed to connect wallet: " + error.message);
+                userAddress = null;
             }
         }
         
-        // Show wallet options
+        // ============ SHOW WALLET OPTIONS ============
         function showWalletOptions() {
             const options = document.getElementById("walletOptions");
             options.style.display = options.style.display === "none" ? "flex" : "none";
+        }
+        
+        function handleWalletClick(e) {
+            const wallet = e.currentTarget.getAttribute("data-wallet");
+            connectWallet(wallet);
         }
         
         // ============ PINATA UPLOAD FUNCTION ============
@@ -897,11 +1174,6 @@
                 return;
             }
             
-            if (!userAddress || !nftContract) {
-                alert("Please connect your wallet first");
-                return;
-            }
-            
             const statusDiv = document.getElementById("mintStatus");
             const mintBtn = document.getElementById("mintBtn");
             
@@ -937,10 +1209,7 @@
                     <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">View on BscScan</a>
                 `;
                 
-                try {
-                    const totalSupply = await nftContract.totalSupply();
-                    document.getElementById("totalNFTs").innerText = totalSupply.toString();
-                } catch (e) {}
+                await loadContractData();
                 
                 document.getElementById("honoredName").value = "";
                 document.getElementById("memorialMessage").value = "";
@@ -1011,45 +1280,49 @@
             }
         }
         
-        // ============ EVENT LISTENERS ============
-        document.getElementById("connectWalletBtn")?.addEventListener("click", showWalletOptions);
-        
-        document.querySelectorAll(".wallet-option").forEach(option => {
-            option.addEventListener("click", (e) => {
-                const wallet = e.target.getAttribute("data-wallet");
-                connectWallet(wallet);
+        // ============ EVENT LISTENERS INITIALIZATION ============
+        function init() {
+            setupEventListeners();
+            
+            document.getElementById("connectWalletBtn")?.addEventListener("click", showWalletOptions);
+            
+            document.querySelectorAll(".wallet-option").forEach(option => {
+                option.addEventListener("click", handleWalletClick);
             });
-        });
-        
-        document.getElementById("mintBtn")?.addEventListener("click", mintNFT);
-        
-        const uploadArea = document.getElementById("uploadArea");
-        const fileInput = document.getElementById("fileInput");
-        
-        uploadArea?.addEventListener("click", () => fileInput.click());
-        fileInput?.addEventListener("change", (e) => {
-            if (e.target.files[0]) handleFileUpload(e.target.files[0]);
-        });
-        
-        uploadArea?.addEventListener("dragover", (e) => {
-            e.preventDefault();
-            uploadArea.style.background = "rgba(255,215,0,0.1)";
-        });
-        
-        uploadArea?.addEventListener("dragleave", () => {
-            uploadArea.style.background = "transparent";
-        });
-        
-        uploadArea?.addEventListener("drop", (e) => {
-            e.preventDefault();
-            uploadArea.style.background = "transparent";
-            if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
-        });
-        
-        // Check if wallet was previously connected (page reload)
-        if (window.ethereum && window.ethereum.selectedAddress) {
-            connectWallet('metamask');
+            
+            document.getElementById("mintBtn")?.addEventListener("click", mintNFT);
+            
+            const uploadArea = document.getElementById("uploadArea");
+            const fileInput = document.getElementById("fileInput");
+            
+            uploadArea?.addEventListener("click", () => fileInput.click());
+            fileInput?.addEventListener("change", (e) => {
+                if (e.target.files[0]) handleFileUpload(e.target.files[0]);
+            });
+            
+            uploadArea?.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                uploadArea.style.background = "rgba(255,215,0,0.1)";
+            });
+            
+            uploadArea?.addEventListener("dragleave", () => {
+                uploadArea.style.background = "transparent";
+            });
+            
+            uploadArea?.addEventListener("drop", (e) => {
+                e.preventDefault();
+                uploadArea.style.background = "transparent";
+                if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
+            });
+            
+            checkWalletConnection().then(isConnected => {
+                if (isConnected) {
+                    connectWallet('metamask');
+                }
+            });
         }
+        
+        init();
     </script>
 </body>
 </html>
