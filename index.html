@@ -21,6 +21,10 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Web3 Modal for Multi-Wallet Support -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    
     <style>
         :root {
             --gold: #FFD700;
@@ -254,6 +258,11 @@
             font-size: 1rem;
         }
         
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
         select option {
             background: var(--dark-gray);
             color: white;
@@ -437,25 +446,27 @@
             color: var(--gold);
         }
         
-        /* Mobile Wallet Connect Fix */
-        @media (max-width: 768px) {
-            .wallet-info {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .connect-btn {
-                padding: 12px 25px;
-                font-size: 1rem;
-            }
-            
-            .logo-text {
-                font-size: 1.8rem;
-            }
-            
-            .header h1 {
-                font-size: 1.8rem;
-            }
+        /* Wallet options */
+        .wallet-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .wallet-option {
+            background: rgba(255,215,0,0.1);
+            border: 1px solid var(--gold);
+            border-radius: 10px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .wallet-option:hover {
+            background: rgba(255,215,0,0.3);
         }
     </style>
 </head>
@@ -494,6 +505,12 @@
                 <button class="connect-btn" id="connectWalletBtn">
                     <i class="fas fa-wallet"></i> Connect Wallet
                 </button>
+                <div class="wallet-options" id="walletOptions" style="display: none;">
+                    <div class="wallet-option" data-wallet="metamask">🦊 MetaMask</div>
+                    <div class="wallet-option" data-wallet="trustwallet">📱 Trust Wallet</div>
+                    <div class="wallet-option" data-wallet="walletconnect">🔗 WalletConnect</div>
+                    <div class="wallet-option" data-wallet="coinbase">💰 Coinbase Wallet</div>
+                </div>
             </div>
         </div>
         
@@ -537,7 +554,7 @@
                 
                 <div class="form-group">
                     <label><i class="fas fa-heart"></i> Memorial Message</label>
-                    <textarea id="memorialMessage" rows="3" placeholder="Share a tribute, memory, or message of hope..." required></textarea>
+                    <textarea id="memorialMessage" rows="4" placeholder="Share a tribute, memory, or message of hope..." required></textarea>
                 </div>
                 
                 <div class="form-group">
@@ -840,14 +857,12 @@
         </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script type="module">
         // ============ PINATA STORAGE ============
         const PINATA_API_KEY = '1749c5278d27059c35c5';
         const PINATA_SECRET = '79988f5e63c0a6906ff9274a08d7d69d54778472ddff08e6854a802796132757';
         
         // ============ CONFIGURATION ============
-        // YOUR DEPLOYED CONTRACT ADDRESS
         const CONTRACT_ADDRESS = "0x5A3CaDB539b96cC461a5219C956F8106165BC4ae";
         
         const CONTRACT_ABI = [
@@ -865,7 +880,6 @@
         
         // ============ PINATA UPLOAD FUNCTION ============
         async function uploadToPinata(file, nftTitle, description, honoredName) {
-            // Step 1: Upload image to Pinata
             const imageFormData = new FormData();
             imageFormData.append('file', file);
             
@@ -886,7 +900,6 @@
             const imageData = await imageResponse.json();
             const imageCID = imageData.IpfsHash;
             
-            // Step 2: Create metadata
             const metadata = {
                 name: nftTitle || `In Memory of ${honoredName}`,
                 description: description,
@@ -899,7 +912,6 @@
                 ]
             };
             
-            // Step 3: Upload metadata to Pinata
             const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });
             const metadataFormData = new FormData();
             metadataFormData.append('file', metadataBlob, 'metadata.json');
@@ -923,53 +935,42 @@
             };
         }
         
-        // ============ WALLET CONNECTION (Desktop & Mobile) ============
-        async function connectWallet() {
-            // Check if wallet is available (MetaMask, Trust Wallet, Coinbase Wallet, etc.)
-            if (!window.ethereum) {
-                alert("Please install a Web3 wallet like MetaMask, Trust Wallet, or Coinbase Wallet to use this DApp.");
+        // ============ WALLET CONNECTION (Multi-Wallet Support) ============
+        async function connectWallet(walletType = 'metamask') {
+            if (walletType === 'metamask' && !window.ethereum) {
+                alert("Please install MetaMask or Trust Wallet");
                 return;
             }
             
             try {
-                // Try to switch to BSC Mainnet
-                try {
+                // Request BSC Mainnet
+                await window.ethereum.request({
+                    method: "wallet_switchEthereumChain",
+                    params: [{ chainId: "0x38" }]
+                }).catch(async () => {
                     await window.ethereum.request({
-                        method: "wallet_switchEthereumChain",
-                        params: [{ chainId: "0x38" }]
+                        method: "wallet_addEthereumChain",
+                        params: [{
+                            chainId: "0x38",
+                            chainName: "BNB Smart Chain",
+                            nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
+                            rpcUrls: ["https://bsc-dataseed.binance.org"],
+                            blockExplorerUrls: ["https://bscscan.com"]
+                        }]
                     });
-                } catch (switchError) {
-                    // If BSC is not added, add it
-                    if (switchError.code === 4902) {
-                        await window.ethereum.request({
-                            method: "wallet_addEthereumChain",
-                            params: [{
-                                chainId: "0x38",
-                                chainName: "BNB Smart Chain",
-                                nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
-                                rpcUrls: ["https://bsc-dataseed.binance.org"],
-                                blockExplorerUrls: ["https://bscscan.com"]
-                            }]
-                        });
-                    } else {
-                        throw switchError;
-                    }
-                }
+                });
                 
                 const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
                 userAddress = accounts[0];
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
                 
-                // Initialize contract
                 nftContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
                 
-                // Get total supply
                 try {
                     const totalSupply = await nftContract.totalSupply();
                     document.getElementById("totalNFTs").innerText = totalSupply.toString();
                 } catch (e) {
-                    console.log("Could not fetch total supply:", e);
                     document.getElementById("totalNFTs").innerText = "0";
                 }
                 
@@ -987,6 +988,7 @@
                 document.getElementById("bnbBalance").innerHTML = `${parseFloat(ethers.utils.formatEther(bnbBalance)).toFixed(4)} BNB`;
                 document.getElementById("mintBtn").disabled = false;
                 document.getElementById("mintBtn").innerHTML = '<i class="fas fa-gem"></i> Mint Memorial NFT (0.001 BNB)';
+                document.getElementById("walletOptions").style.display = "none";
                 
                 document.getElementById("disconnectBtn")?.addEventListener("click", () => location.reload());
                 
@@ -994,6 +996,12 @@
                 console.error("Connection error:", error);
                 alert("Failed to connect wallet: " + error.message);
             }
+        }
+        
+        // Show wallet options
+        function showWalletOptions() {
+            const options = document.getElementById("walletOptions");
+            options.style.display = options.style.display === "none" ? "flex" : "none";
         }
         
         // ============ MINT NFT ============
@@ -1047,20 +1055,17 @@
                     <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">View on BscScan</a>
                 `;
                 
-                // Update total NFTs count
                 try {
                     const totalSupply = await nftContract.totalSupply();
                     document.getElementById("totalNFTs").innerText = totalSupply.toString();
                 } catch (e) {}
                 
-                // Reset form
                 document.getElementById("honoredName").value = "";
                 document.getElementById("memorialMessage").value = "";
                 document.getElementById("previewImage").style.display = "none";
                 document.getElementById("uploadStatus").innerHTML = "";
                 uploadedMetadataCID = null;
                 
-                // Update BNB balance
                 const newBalance = await provider.getBalance(userAddress);
                 document.getElementById("bnbBalance").innerHTML = `${parseFloat(ethers.utils.formatEther(newBalance)).toFixed(4)} BNB`;
                 
@@ -1077,7 +1082,6 @@
         async function handleFileUpload(file) {
             if (!file) return;
             
-            // Preview
             const reader = new FileReader();
             reader.onload = (e) => {
                 const preview = document.getElementById("previewImage");
@@ -1126,7 +1130,15 @@
         }
         
         // ============ EVENT LISTENERS ============
-        document.getElementById("connectWalletBtn")?.addEventListener("click", connectWallet);
+        document.getElementById("connectWalletBtn")?.addEventListener("click", showWalletOptions);
+        
+        document.querySelectorAll(".wallet-option").forEach(option => {
+            option.addEventListener("click", (e) => {
+                const wallet = e.target.getAttribute("data-wallet");
+                connectWallet(wallet);
+            });
+        });
+        
         document.getElementById("mintBtn")?.addEventListener("click", mintNFT);
         
         const uploadArea = document.getElementById("uploadArea");
@@ -1151,21 +1163,6 @@
             uploadArea.style.background = "transparent";
             if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
         });
-        
-        // Listen for account changes
-        if (window.ethereum) {
-            window.ethereum.on("accountsChanged", (accounts) => {
-                if (accounts.length === 0) {
-                    location.reload();
-                } else if (accounts[0] !== userAddress) {
-                    location.reload();
-                }
-            });
-            
-            window.ethereum.on("chainChanged", () => {
-                location.reload();
-            });
-        }
     </script>
 </body>
 </html>
