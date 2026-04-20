@@ -138,7 +138,7 @@
         }
         
         .disconnect-btn {
-            background: rgba(255,215,0,0.1);
+            background: rgba(255,215,0,0.2);
             color: var(--gold);
             border: 1px solid var(--gold);
             padding: 8px 20px;
@@ -151,7 +151,8 @@
         }
         
         .disconnect-btn:hover {
-            background: rgba(255,215,0,0.3);
+            background: rgba(255,215,0,0.4);
+            transform: scale(1.02);
         }
         
         .wallet-info {
@@ -164,11 +165,6 @@
             gap: 10px;
             flex-wrap: wrap;
             justify-content: center;
-        }
-        
-        .wallet-address {
-            font-family: monospace;
-            font-size: 1rem;
         }
         
         .stats-banner {
@@ -486,22 +482,31 @@
         
         .wallet-option:hover {
             background: rgba(255,215,0,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .wallet-status-badge {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #28a745;
+            margin-right: 8px;
+            animation: pulse 1.5s infinite;
         }
         
         .network-badge {
-            display: inline-block;
-            background: rgba(40,167,69,0.2);
-            border: 1px solid #28a745;
-            border-radius: 20px;
-            padding: 4px 12px;
             font-size: 0.75rem;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 8px;
+            border-radius: 20px;
             margin-left: 10px;
-            color: #28a745;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Navigation Bar -->
         <div class="nav-bar">
             <a href="index.html">Home</a>
             <a href="https://mummytokencoin.com" target="_blank">Main Website</a>
@@ -558,6 +563,7 @@
         </div>
         
         <div class="main-grid">
+            <!-- Left Column: Create Memorial NFT -->
             <div class="card">
                 <h2><i class="fas fa-upload"></i> Create Memorial NFT</h2>
                 
@@ -803,6 +809,7 @@
                 <div id="mintStatus" class="status"></div>
             </div>
             
+            <!-- Right Column: About LHOPE Memorial NFTs -->
             <div class="card">
                 <h2><i class="fas fa-info-circle"></i> About LHOPE Memorial NFTs</h2>
                 <p style="margin-bottom: 20px; line-height: 1.6;">Each LHOPE Memorial NFT is a permanent tribute on the Binance Smart Chain honoring someone affected by liver disease. <strong>70% of every contribution goes directly to the LHOPE Fund</strong> to support:</p>
@@ -832,6 +839,7 @@
                     <p style="font-size: 11px;">Free tier: 1 GB | Reliable & Fast</p>
                 </div>
                 
+                <!-- Tokenomics Section -->
                 <div class="lhope-info" style="margin-top: 20px;">
                     <p><strong>💰 $MTC Tokenomics</strong></p>
                     <p style="font-size: 14px; margin-bottom: 10px;">Total Supply: <strong>1,000,000,000 MTC</strong></p>
@@ -889,8 +897,6 @@
         
         // ============ CONFIGURATION ============
         const CONTRACT_ADDRESS = "0x5A3CaDB539b96cC461a5219C956F8106165BC4ae";
-        const BSC_CHAIN_ID = "0x38"; // 56 in hex
-        const BSC_CHAIN_ID_DECIMAL = 56;
         
         const CONTRACT_ABI = [
             "function mintMemorial(string memory tokenURI, string memory honoredPerson, string memory memorialMessage, string memory country) public payable returns (uint256)",
@@ -899,6 +905,7 @@
             "function mintPriceBNB() public view returns (uint256)"
         ];
         
+        // Global variables
         let provider = null;
         let signer = null;
         let nftContract = null;
@@ -906,133 +913,24 @@
         let uploadedMetadataCID = null;
         let currentProvider = null;
         
-        // ============ CHECK IF WALLET IS CONNECTED ============
-        async function checkWalletConnection() {
-            if (!window.ethereum) return false;
-            
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                if (accounts.length > 0) {
-                    userAddress = accounts[0];
-                    return true;
-                }
-            } catch (error) {
-                console.log("No accounts found");
-            }
-            return false;
-        }
+        // DOM Elements
+        const walletStatusDiv = document.getElementById("walletStatus");
+        const connectBtn = document.getElementById("connectWalletBtn");
+        const walletOptions = document.getElementById("walletOptions");
+        const statsBanner = document.getElementById("statsBanner");
+        const mintBtn = document.getElementById("mintBtn");
+        const totalNFTsSpan = document.getElementById("totalNFTs");
+        const bnbBalanceSpan = document.getElementById("bnbBalance");
         
-        // ============ SWITCH TO BSC NETWORK ============
-        async function switchToBSCNetwork() {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: BSC_CHAIN_ID }]
-                });
-                return true;
-            } catch (switchError) {
-                if (switchError.code === 4902) {
-                    try {
-                        await window.ethereum.request({
-                            method: 'wallet_addEthereumChain',
-                            params: [{
-                                chainId: BSC_CHAIN_ID,
-                                chainName: 'BNB Smart Chain',
-                                nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
-                                rpcUrls: ['https://bsc-dataseed.binance.org'],
-                                blockExplorerUrls: ['https://bscscan.com']
-                            }]
-                        });
-                        return true;
-                    } catch (addError) {
-                        console.error("Failed to add BSC network:", addError);
-                        return false;
-                    }
-                } else {
-                    console.error("Failed to switch network:", switchError);
-                    return false;
-                }
-            }
-        }
-        
-        // ============ SETUP EVENT LISTENERS ============
-        function setupEventListeners() {
-            if (!window.ethereum) return;
-            
-            window.ethereum.on('accountsChanged', (accounts) => {
-                if (accounts.length === 0) {
-                    disconnectWallet();
-                } else if (accounts[0] !== userAddress) {
-                    userAddress = accounts[0];
-                    updateWalletUI();
-                    loadContractData();
-                }
-            });
-            
-            window.ethereum.on('chainChanged', (chainId) => {
-                if (chainId !== BSC_CHAIN_ID) {
-                    alert("Please switch to BNB Smart Chain network to use this DApp.");
-                    disconnectWallet();
-                } else {
-                    window.location.reload();
-                }
-            });
-        }
-        
-        // ============ LOAD CONTRACT DATA ============
-        async function loadContractData() {
-            if (!nftContract) return;
-            
-            try {
-                const totalSupply = await nftContract.totalSupply();
-                document.getElementById("totalNFTs").innerText = totalSupply.toString();
-                
-                const balance = await nftContract.balanceOf(userAddress);
-                document.getElementById("yourNFTs").innerText = balance.toString();
-            } catch (e) {
-                console.log("Could not fetch contract data:", e);
-            }
-        }
-        
-        // ============ UPDATE WALLET UI ============
-        async function updateWalletUI() {
-            if (userAddress && provider) {
-                const bnbBalance = await provider.getBalance(userAddress);
-                const balanceBNB = parseFloat(ethers.utils.formatEther(bnbBalance)).toFixed(4);
-                
-                document.getElementById("walletStatus").innerHTML = `
-                    <div class="wallet-info">
-                        <i class="fas fa-check-circle" style="color: var(--gold);"></i>
-                        <span class="wallet-address">${userAddress.slice(0,6)}...${userAddress.slice(-4)}</span>
-                        <span class="network-badge">BSC Mainnet</span>
-                        <span style="font-size: 0.9rem;">(${balanceBNB} BNB)</span>
-                        <button class="disconnect-btn" id="disconnectBtn">
-                            <i class="fas fa-sign-out-alt"></i> Disconnect
-                        </button>
-                    </div>
-                `;
-                
-                document.getElementById("statsBanner").style.display = "grid";
-                document.getElementById("bnbBalance").innerHTML = `${balanceBNB} BNB`;
-                document.getElementById("mintBtn").disabled = false;
-                document.getElementById("mintBtn").innerHTML = '<i class="fas fa-gem"></i> Mint Memorial NFT (0.001 BNB)';
-                document.getElementById("walletOptions").style.display = "none";
-                
-                document.getElementById("disconnectBtn")?.addEventListener("click", disconnectWallet);
-                
-                await loadContractData();
-            }
-        }
-        
-        // ============ DISCONNECT WALLET ============
-        async function disconnectWallet() {
+        // ============ HELPER FUNCTIONS ============
+        function resetUIForDisconnected() {
             userAddress = null;
             provider = null;
             signer = null;
             nftContract = null;
-            uploadedMetadataCID = null;
+            currentProvider = null;
             
-            document.getElementById("walletStatus").innerHTML = `
+            walletStatusDiv.innerHTML = `
                 <button class="connect-btn" id="connectWalletBtn">
                     <i class="fas fa-wallet"></i> Connect Wallet
                 </button>
@@ -1043,62 +941,57 @@
                 </div>
             `;
             
-            document.getElementById("statsBanner").style.display = "none";
-            document.getElementById("mintBtn").disabled = true;
-            document.getElementById("mintBtn").innerHTML = '<i class="fas fa-gem"></i> Connect Wallet to Mint';
-            document.getElementById("previewImage").style.display = "none";
-            document.getElementById("uploadStatus").innerHTML = "";
-            document.getElementById("honoredName").value = "";
-            document.getElementById("memorialMessage").value = "";
-            document.getElementById("nftTitle").value = "";
+            statsBanner.style.display = "none";
+            mintBtn.disabled = true;
+            mintBtn.innerHTML = '<i class="fas fa-gem"></i> Connect Wallet to Mint';
+            uploadedMetadataCID = null;
             
+            // Re-attach event listeners
             document.getElementById("connectWalletBtn")?.addEventListener("click", showWalletOptions);
-            
             document.querySelectorAll(".wallet-option").forEach(option => {
-                option.removeEventListener("click", handleWalletClick);
-                option.addEventListener("click", handleWalletClick);
+                option.addEventListener("click", (e) => {
+                    const wallet = e.currentTarget.getAttribute("data-wallet");
+                    connectWallet(wallet);
+                });
             });
         }
         
-        // ============ CONNECT WALLET ============
-        async function connectWallet(walletType = 'metamask') {
-            if (!window.ethereum) {
-                alert("No wallet detected. Please install MetaMask, Trust Wallet, or Coinbase Wallet.");
-                return;
-            }
+        function updateConnectedUI(address, balance) {
+            walletStatusDiv.innerHTML = `
+                <div class="wallet-info">
+                    <span class="wallet-status-badge"></span>
+                    <i class="fas fa-check-circle" style="color: var(--gold);"></i>
+                    Connected: ${address.slice(0,6)}...${address.slice(-4)}
+                    <span class="network-badge">BSC Mainnet</span>
+                    <button class="disconnect-btn" id="disconnectBtn">
+                        <i class="fas fa-sign-out-alt"></i> Disconnect
+                    </button>
+                </div>
+            `;
             
+            statsBanner.style.display = "grid";
+            bnbBalanceSpan.innerHTML = `${parseFloat(ethers.utils.formatEther(balance)).toFixed(4)} BNB`;
+            mintBtn.disabled = false;
+            mintBtn.innerHTML = '<i class="fas fa-gem"></i> Mint Memorial NFT (0.001 BNB)';
+            
+            document.getElementById("disconnectBtn")?.addEventListener("click", disconnectWallet);
+        }
+        
+        async function disconnectWallet() {
             try {
-                const networkValid = await switchToBSCNetwork();
-                if (!networkValid) {
-                    alert("Please switch to BNB Smart Chain network manually.");
-                    return;
-                }
+                // Clear all wallet data
+                userAddress = null;
+                provider = null;
+                signer = null;
+                nftContract = null;
                 
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                userAddress = accounts[0];
-                
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                signer = provider.getSigner();
-                nftContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-                
-                await updateWalletUI();
+                // Reload page to clear all states
+                location.reload();
                 
             } catch (error) {
-                console.error("Connection error:", error);
-                alert("Failed to connect wallet: " + error.message);
-                userAddress = null;
+                console.error("Disconnect error:", error);
+                location.reload();
             }
-        }
-        
-        // ============ SHOW WALLET OPTIONS ============
-        function showWalletOptions() {
-            const options = document.getElementById("walletOptions");
-            options.style.display = options.style.display === "none" ? "flex" : "none";
-        }
-        
-        function handleWalletClick(e) {
-            const wallet = e.currentTarget.getAttribute("data-wallet");
-            connectWallet(wallet);
         }
         
         // ============ PINATA UPLOAD FUNCTION ============
@@ -1158,6 +1051,122 @@
             };
         }
         
+        // ============ WALLET CONNECTION ============
+        async function connectWallet(walletType = 'metamask') {
+            if (!window.ethereum) {
+                alert("Please install a Web3 wallet like MetaMask, Trust Wallet, or Coinbase Wallet");
+                return;
+            }
+            
+            try {
+                // Request account access
+                const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+                
+                if (!accounts || accounts.length === 0) {
+                    throw new Error("No accounts found. Please unlock your wallet.");
+                }
+                
+                userAddress = accounts[0];
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                
+                // Check network - must be BSC Mainnet (chainId 56)
+                const network = await provider.getNetwork();
+                const chainId = network.chainId;
+                
+                if (chainId !== 56) {
+                    // Try to switch to BSC Mainnet
+                    try {
+                        await window.ethereum.request({
+                            method: "wallet_switchEthereumChain",
+                            params: [{ chainId: "0x38" }]
+                        });
+                    } catch (switchError) {
+                        // If BSC is not added, add it
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: "wallet_addEthereumChain",
+                                params: [{
+                                    chainId: "0x38",
+                                    chainName: "BNB Smart Chain",
+                                    nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 },
+                                    rpcUrls: ["https://bsc-dataseed.binance.org"],
+                                    blockExplorerUrls: ["https://bscscan.com"]
+                                }]
+                            });
+                        } else {
+                            throw new Error("Please switch to BNB Smart Chain (BSC Mainnet) to use this DApp");
+                        }
+                    }
+                    // After switching, refresh provider
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                }
+                
+                // Initialize contract
+                nftContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                
+                // Get total supply
+                try {
+                    const totalSupply = await nftContract.totalSupply();
+                    totalNFTsSpan.innerText = totalSupply.toString();
+                } catch (e) {
+                    totalNFTsSpan.innerText = "0";
+                }
+                
+                const bnbBalance = await provider.getBalance(userAddress);
+                
+                updateConnectedUI(userAddress, bnbBalance);
+                walletOptions.style.display = "none";
+                
+                // Setup event listeners for account and network changes
+                setupEventListeners();
+                
+            } catch (error) {
+                console.error("Connection error:", error);
+                alert("Failed to connect wallet: " + error.message);
+                resetUIForDisconnected();
+            }
+        }
+        
+        function setupEventListeners() {
+            if (!window.ethereum) return;
+            
+            // Handle account changes
+            window.ethereum.on('accountsChanged', async (accounts) => {
+                if (accounts.length === 0) {
+                    // User disconnected
+                    resetUIForDisconnected();
+                } else if (accounts[0] !== userAddress) {
+                    // Account switched
+                    userAddress = accounts[0];
+                    const bnbBalance = await provider.getBalance(userAddress);
+                    updateConnectedUI(userAddress, bnbBalance);
+                    
+                    // Refresh contract
+                    nftContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                    
+                    try {
+                        const totalSupply = await nftContract.totalSupply();
+                        totalNFTsSpan.innerText = totalSupply.toString();
+                    } catch (e) {}
+                }
+            });
+            
+            // Handle network changes
+            window.ethereum.on('chainChanged', () => {
+                location.reload();
+            });
+        }
+        
+        // Show wallet options
+        function showWalletOptions() {
+            const options = document.getElementById("walletOptions");
+            if (options) {
+                options.style.display = options.style.display === "none" ? "flex" : "none";
+            }
+        }
+        
         // ============ MINT NFT ============
         async function mintNFT() {
             const honoredName = document.getElementById("honoredName").value;
@@ -1174,8 +1183,12 @@
                 return;
             }
             
+            if (!nftContract) {
+                alert("Please connect your wallet first");
+                return;
+            }
+            
             const statusDiv = document.getElementById("mintStatus");
-            const mintBtn = document.getElementById("mintBtn");
             
             statusDiv.className = "status loading";
             statusDiv.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Preparing to mint your Memorial NFT...";
@@ -1209,7 +1222,10 @@
                     <a href="https://bscscan.com/tx/${tx.hash}" target="_blank">View on BscScan</a>
                 `;
                 
-                await loadContractData();
+                try {
+                    const totalSupply = await nftContract.totalSupply();
+                    totalNFTsSpan.innerText = totalSupply.toString();
+                } catch (e) {}
                 
                 document.getElementById("honoredName").value = "";
                 document.getElementById("memorialMessage").value = "";
@@ -1218,7 +1234,7 @@
                 uploadedMetadataCID = null;
                 
                 const newBalance = await provider.getBalance(userAddress);
-                document.getElementById("bnbBalance").innerHTML = `${parseFloat(ethers.utils.formatEther(newBalance)).toFixed(4)} BNB`;
+                bnbBalanceSpan.innerHTML = `${parseFloat(ethers.utils.formatEther(newBalance)).toFixed(4)} BNB`;
                 
             } catch (error) {
                 console.error("Minting error:", error);
@@ -1280,49 +1296,43 @@
             }
         }
         
-        // ============ EVENT LISTENERS INITIALIZATION ============
-        function init() {
-            setupEventListeners();
-            
-            document.getElementById("connectWalletBtn")?.addEventListener("click", showWalletOptions);
-            
-            document.querySelectorAll(".wallet-option").forEach(option => {
-                option.addEventListener("click", handleWalletClick);
-            });
-            
-            document.getElementById("mintBtn")?.addEventListener("click", mintNFT);
-            
-            const uploadArea = document.getElementById("uploadArea");
-            const fileInput = document.getElementById("fileInput");
-            
-            uploadArea?.addEventListener("click", () => fileInput.click());
-            fileInput?.addEventListener("change", (e) => {
-                if (e.target.files[0]) handleFileUpload(e.target.files[0]);
-            });
-            
-            uploadArea?.addEventListener("dragover", (e) => {
-                e.preventDefault();
-                uploadArea.style.background = "rgba(255,215,0,0.1)";
-            });
-            
-            uploadArea?.addEventListener("dragleave", () => {
-                uploadArea.style.background = "transparent";
-            });
-            
-            uploadArea?.addEventListener("drop", (e) => {
-                e.preventDefault();
-                uploadArea.style.background = "transparent";
-                if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
-            });
-            
-            checkWalletConnection().then(isConnected => {
-                if (isConnected) {
-                    connectWallet('metamask');
-                }
-            });
-        }
+        // ============ EVENT LISTENERS ============
+        document.getElementById("connectWalletBtn")?.addEventListener("click", showWalletOptions);
         
-        init();
+        document.querySelectorAll(".wallet-option").forEach(option => {
+            option.addEventListener("click", (e) => {
+                const wallet = e.currentTarget.getAttribute("data-wallet");
+                connectWallet(wallet);
+            });
+        });
+        
+        document.getElementById("mintBtn")?.addEventListener("click", mintNFT);
+        
+        const uploadArea = document.getElementById("uploadArea");
+        const fileInput = document.getElementById("fileInput");
+        
+        uploadArea?.addEventListener("click", () => fileInput.click());
+        fileInput?.addEventListener("change", (e) => {
+            if (e.target.files[0]) handleFileUpload(e.target.files[0]);
+        });
+        
+        uploadArea?.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            uploadArea.style.background = "rgba(255,215,0,0.1)";
+        });
+        
+        uploadArea?.addEventListener("dragleave", () => {
+            uploadArea.style.background = "transparent";
+        });
+        
+        uploadArea?.addEventListener("drop", (e) => {
+            e.preventDefault();
+            uploadArea.style.background = "transparent";
+            if (e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
+        });
+        
+        // Check if already connected on page load? NO - user must explicitly connect
+        // This prevents auto-connect issues
     </script>
 </body>
 </html>
